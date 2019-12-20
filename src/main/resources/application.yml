@@ -1,0 +1,27 @@
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8001/eureka/
+server:
+  port: 8005
+spring:
+  application:
+    name: api-gateway
+#路由
+zuul:
+  routes:
+   # eureka-product: /myProduct/**
+    myProduct:
+      path: /myProduct/**
+      serviceId: eureka-product
+      sensitiveHeaders:
+  ignored-patterns:
+    - /**/product/listForOrder
+management:
+  endpoints:
+    web:
+      exposure:
+        include: routes
+ribbon:
+  ReadTimeout: 60000
+  ConnectTimeout: 60000
