@@ -10,13 +10,13 @@ spring:
 #路由
 zuul:
   routes:
-   # eureka-product: /myProduct/**
+    # eureka-product: /myProduct/**
     myProduct:
       path: /myProduct/**
       serviceId: eureka-product
       sensitiveHeaders:
   ignored-patterns:
-    - /**/product/listForOrder
+  - /**/product/listForOrder
 management:
   endpoints:
     web:
