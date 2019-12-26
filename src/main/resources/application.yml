@@ -7,6 +7,10 @@ server:
 spring:
   application:
     name: api-gateway
+  #集成redis配置
+  redis:
+    host: 192.168.1.191
+    port: 6379
 #路由
 zuul:
   routes:
@@ -14,9 +18,13 @@ zuul:
     myProduct:
       path: /myProduct/**
       serviceId: eureka-product
-      sensitiveHeaders:
-  ignored-patterns:
-  - /**/product/listForOrder
+    myOrder:
+      path: /myOrder/**
+      serviceId: eureka-order
+  # ignored-patterns:
+  # - /**/product/listForOrder
+  #全部服务忽略敏感头
+  sensitive-headers:
 management:
   endpoints:
     web:
