@@ -23,7 +23,7 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
  * @Date created in 14:33 2019/12/20
  */
 @Component
-public class AuthFilter extends ZuulFilter {
+public class AuthSellerFilter extends ZuulFilter {
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
 
@@ -39,7 +39,13 @@ public class AuthFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        return true;
+        RequestContext requestContext = RequestContext.getCurrentContext();
+        HttpServletRequest request = requestContext.getRequest();
+
+        if("/myOrder/order/finish".equals(request.getRequestURI())){
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -47,28 +53,15 @@ public class AuthFilter extends ZuulFilter {
         RequestContext requestContext = RequestContext.getCurrentContext();
         HttpServletRequest request = requestContext.getRequest();
         /**
-         * /order/create 只能买家访问
          * /order/finish 只能卖家访问
-         * /product/list 都能访问
          */
-        if("/myOrder/order/create".equals(request.getRequestURI())){
-            Cookie cookie = CookieUtil.get(request,"openid");
-            if(cookie == null || StringUtils.isEmpty(cookie.getValue())){
-                requestContext.setSendZuulResponse(false);
-                requestContext.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);
-            }
+        Cookie cookie = CookieUtil.get(request,"token");
+        if(cookie == null
+                || StringUtils.isEmpty(cookie.getValue() )
+                || StringUtils.isEmpty(stringRedisTemplate.opsForValue().get(String.format(RedisConstant.TOKEN_TEMPLATE,cookie.getValue())))){
+            requestContext.setSendZuulResponse(false);
+            requestContext.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);
         }
-
-        if("/myOrder/order/finish".equals(request.getRequestURI())){
-            Cookie cookie = CookieUtil.get(request,"token");
-            if(cookie == null
-                    || StringUtils.isEmpty(cookie.getValue() )
-                    || StringUtils.isEmpty(stringRedisTemplate.opsForValue().get(String.format(RedisConstant.TOKEN_TEMPLATE,cookie.getValue())))){
-                requestContext.setSendZuulResponse(false);
-                requestContext.setResponseStatusCode(HttpStatus.SC_UNAUTHORIZED);
-            }
-        }
-
         return null;
     }
 }
